@@ -2,17 +2,27 @@
     "name": "graphql-crud-backend",
     "version": "1.0.0",
     "scripts": {
-        "start": "node index.js",
-        "dev": "nodemon index.js"
+        "start:api": "node index.js",
+        "start:llm": "node llm.js",
+        "start:all": "concurrently \"npm run start:api\" \"npm run start:llm\"",
+        "dev:api": "nodemon index.js",
+        "dev:llm": "nodemon llm.js",
+        "dev:all": "concurrently \"npm run dev:api\" \"npm run dev:llm\""
     },
     "dependencies": {
         "apollo-server": "^3.12.0",
+        "axios": "^1.12.2",
+        "cors": "^2.8.5",
         "dotenv": "^17.2.2",
+        "express": "^4.21.2",
         "graphql": "^16.8.1",
         "mongodb": "^6.5.0",
-        "mongoose": "^8.0.3"
+        "mongoose": "^8.0.3",
+        "node-fetch": "^3.3.2",
+        "openai": "^5.23.0"
     },
     "devDependencies": {
+        "concurrently": "^9.2.1",
         "nodemon": "^3.0.2"
     },
     "description": "",

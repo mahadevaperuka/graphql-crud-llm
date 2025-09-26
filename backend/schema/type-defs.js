@@ -26,13 +26,13 @@ const typeDefs = gql `
         homeworld: String
      }
     type Query{
-        getCharacters: [Character!]!
-        getSpecies: [Species!]!
+        getCharacters(filter: String): [Character!]!
+        getSpecies(filter: String): [Species!]!
     }
     input CharacterInput{
         name: String!
         height: Float 
-        mass: Int 
+        mass: Float 
         hair_color: [String]
         skin_color: [String]
         eye_color: [String]
@@ -55,7 +55,7 @@ const typeDefs = gql `
     }
     input CharacterUpdate{
         height: Float
-        mass: Int
+        mass: Float
         hair_color: [String]
         skin_color: [String]
         eye_color: [String]
