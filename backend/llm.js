@@ -5,8 +5,7 @@ const cors = require("cors");
 const app = express();
 app.use(cors());
 app.use(express.json());
-
-const schema = ` type Character{
+const schema = `type Character{
         name: String!
         height: Float 
         mass: Float 
@@ -31,8 +30,8 @@ const schema = ` type Character{
         homeworld: String
      }
     type Query{
-        getCharacters(filter: String): [Character!]!
-        getSpecies(filter: String): [Species!]!
+        getCharacter(filter: String): [Character!]! 
+        getSpecies(filter: String): [Species!]! 
     }
     input CharacterInput{
         name: String!
@@ -88,7 +87,6 @@ const schema = ` type Character{
         deleteCharacter(name: String!): Character!
         deleteSpecies(name: String!): Species!
     }`
-
 app.post("/chat", async (req, res) => {
   const { message } = req.body;
   try {
@@ -103,45 +101,45 @@ app.post("/chat", async (req, res) => {
                         Your ONLY task is to translate user requests into valid GraphQL operations, following all rules strictly.  
                         You must output ONLY a JSON object with exactly two keys: "result" and "data".
 
-                        ========================================
-                        GRAPHQL SCHEMA
-                        ${schema}
-                        ========================================
-
                         CHEAT SHEET (understand functions, args, and data):
-
+                        Here's the schema for reference:
+                        ===================
+                        ${schema}
+                        ===================
                         Queries:
-                        - getCharacters(filter: String): [Character!]!
-                        • filter is a Mongo-style JSON string that can Retrieves characters with filters.
+                        - getCharacter(filter: String): [Character!]!
+                        • filter is a Mongo-style(mongoose) JSON string that can Retrieves characters with filters.
                         • Example filter: "{\\"height\\": {\\"$gt\\": 180}}" - with escape lines
                         - getSpecies(filter: String): [Species!]!
-                        • filter is a Mongo-style JSON string that can Retrieves characters with filters.
+                        • filter is a Mongo-style(mongoose) JSON string that can Retrieves characters with filters.
                         • Example filter: "{\\"name\\": {\\"$eq\\": \\"Human\\"}}" - with escape lines
 
                         Mutations:
                         - createCharacter(characterInput: CharacterInput!): Character!
-                        • Create a new character.
+                        • Create a new character by taking characterInput via variables.
                         - createSpecies(speciesInput: SpeciesInput!): Species!
-                        • Create a new species.
+                        • Create a new species by taking SpeciesInput via Variables.
                         - updateCharacter(name: String!, characterUpdate: CharacterUpdate!): Character!
-                        • Update fields of an existing character by name.
+                        • Update fields of an existing character by name. (only name field can't be updated)
                         - updateSpecies(name: String!, speciesUpdate: SpeciesUpdate!): Species!
-                        • Update fields of an existing species by name.
+                        • Update fields of an existing species by name. (only name field can't be updated)
                         - deleteCharacter(name: String!): Character!
                         • Delete a character by name.
                         - deleteSpecies(name: String!): Species!
                         • Delete a species by name.
 
                         Types:
-                        Character fields → [name, height, mass, hair_color, skin_color, eye_color, birth_year, gender, homeworld, species]
-                        Species fields → [name, classification, designation, average_height, average_lifespan, eye_colors, hair_colors, skin_colors, language, homeworld]
+                        Character fields → [name, height, mass, hair_color, skin_color, eye_color, birth_year, gender, homeworld, species] (only name is required, all other are optional)
+                        Species fields → [name, classification, designation, average_height, average_lifespan, eye_colors, hair_colors, skin_colors, language, homeworld] (only name is required, all other are optional)
 
                         STRICT RULES:
 
-                        1. ALWAYS pass inputs via GraphQL variables.  
+                        1. ALWAYS pass inputs via GraphQL variables.  (when user mentions it specifically)
                         - Never inline objects into the query.  
                         - Correct: getCharacters(filter: $filter)  
                         - Incorrect: getCharacters(filter: { name: "Luke" })
+                        - Declare the variable in the query before using them in the variables object.
+                        - Be careful with operation name you are using as it's case sensitive. (follow the schema case)
 
                         2. If the schema argument is String (e.g., filter), declare the variable as ($filter: String) and set variables.filter to a **stringified JSON object** with escape lines must.
 
@@ -171,12 +169,12 @@ app.post("/chat", async (req, res) => {
 
                         FEW-SHOT EXAMPLES:
 
-                        User: "Get all characters"
+                        User: "Get/show/retrieve all characters"
                         Output:
                         {
                         "result": "Success",
                         "data": {
-                            "query": "query { getCharacters { name height species } }",
+                            "query": "query { getCharacter { name height species } }",
                             "variables": {}
                         }
                         }
@@ -186,14 +184,14 @@ app.post("/chat", async (req, res) => {
                         {
                         "result": "Success",
                         "data": {
-                            "query": "query GetCharacters($filter: String) { getCharacters(filter: $filter) { name height mass } }",
+                            "query": "query GetCharacter($filter: String) { getCharacter(filter: $filter) { name height mass } }",
                             "variables": {
                             "filter": "{\\"height\\": {\\"$gt\\": 180}}"
                             }
                         }
                         }
 
-                        User: "Add a new character Luke who is 172 cm tall"
+                        User: "Add a new character \\"Luke\\" who is 172 cm tall"
                         Output:
                         {
                         "result": "Success",
@@ -201,20 +199,19 @@ app.post("/chat", async (req, res) => {
                             "query": "mutation CreateCharacter($characterInput: CharacterInput!) { createCharacter(characterInput: $characterInput) { name height } }",
                             "variables": {
                             "characterInput": {
-                                "name": "Luke",
-                                "height": 172
+                                \\"name\\": \\"Luke\\",
+                                \\"height\\": 172
                             }
                             }
                         }
                         }
 
-                        Now: Translate the following user request into GraphQL strictly following the above schema, rules, and format.  
+                        Now: Translate the following user request into GraphQL strictly following the above schema, rules, and format. Recheck the generated query and variables with the above rules after generating
                         User request: "${message}"
                         `
             }
         ]
     }
-
 
     const llmResponse = await axios.post("http://localhost:12434/engines/llama.cpp/v1/chat/completions", templateQuery);
 
@@ -230,12 +227,13 @@ app.post("/chat", async (req, res) => {
     }
     console.log(responseData)
     let parsed = JSON.parse(responseData.trim())
-    console.log("error here befor JSON Parsing in llm.js")
-    let gqlResponse = null; // Initialize gqlResponse
-    
+    console.log("Reached")
+
+
+    let gqlResponse = null; 
     if(parsed.result === "Success"){
         try {
-            // Send proper GraphQL request
+
             gqlResponse = await axios.post("http://localhost:4000/graphql", {
                 query: parsed.data.query,
                 variables: parsed.data.variables

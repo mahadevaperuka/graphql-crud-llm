@@ -26,7 +26,7 @@ const typeDefs = gql `
         homeworld: String
      }
     type Query{
-        getCharacters(filter: String): [Character!]!
+        getCharacter(filter: String): [Character!]!
         getSpecies(filter: String): [Species!]!
     }
     input CharacterInput{

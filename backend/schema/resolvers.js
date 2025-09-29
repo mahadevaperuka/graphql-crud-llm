@@ -3,7 +3,7 @@ const Species = require("../models/Species");
 
 const resolvers={
     Query:{
-        async getCharacters(_, {filter}){
+        async getCharacter(_, {filter}){
             try {
                 let mongoFilter = {};
                 
@@ -18,7 +18,7 @@ const resolvers={
                 }
                 console.log('Filter received:', mongoFilter);
                 
-                const characters = await Characters.find(mongoFilter);
+                const characters = await Characters.find(mongoFilter).sort();
                 return characters;
             } catch (error) {
                 console.error('Error fetching characters:', error);

@@ -44,7 +44,7 @@ function App() {
         error: ''
       }
 
-      if (data.llmResult === 'Success' && data.result) {
+      if (data.llmResult === 'Success' && data.result.data) {
         responseData = {
           success: true,
           query: data.graphql.query,
@@ -163,6 +163,8 @@ function App() {
                 <li>"Find characters named Luke"</li>
                 <li>"Create a new character named _______"</li>
                 <li>"Show all species"</li>
+                <li>"Delete a character named ______"</li>
+
               </ul>
             </div>
           )}
@@ -215,7 +217,7 @@ function App() {
                       <div className="section">
                         <div className="section-header">Result</div>
                         <div className="code-block json">
-                          <pre>{JSON.stringify(output.answer.result, null, 2)}</pre>
+                          <pre>{JSON.stringify(output.answer.result.data, null, 2)}</pre>
                         </div>
                       </div>
                     )}
